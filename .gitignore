@@ -1,0 +1,17 @@
+.idea/
+
+# World data
+world/
+
+#Java binaries and libaries
+*.jar
+libaries/
+versions/
+
+#Logs (Need to find a way to poll these)
+logs/
+usercache.json
+
+#Monitoring files on the server
+*.pyc
+__pycache__/
