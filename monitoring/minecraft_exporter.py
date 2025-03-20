@@ -103,8 +103,8 @@ def get_server_stats():
             query = minecraft_server.query()
             # Additional metrics could be added here
             QUERY_SUCCESS.inc()
-        except Exception:
-            # Query protocol might not be enabled
+        except AttributeError:  # Replace with the specific exception expected
+            # Handle the case where query protocol is not enabled
             pass
 
     except Exception as e:
