@@ -1,0 +1,22 @@
+name: Deploy Minecraft Server and Monitoring Tools
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/config/**'
+      - 'server/scripts/**'
+      - 'monitoring/**'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.MINECRAFT_SSH_KEY }}
