@@ -1,5 +1,5 @@
 name: Discord Updates
-on: [create, delete, push, pull_request, pull_request_review, issue_comment, push]
+on: [create, delete, push, pull_request, pull_request_review, issue_comment]
 
 jobs:
   webhook-request:
@@ -8,14 +8,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Send Discord Webhook
-        env:
-            DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-            content: ${{ toJson(github.event) }}
-            username: GitHub Actions
-            avatar_url: https://avatars.githubusercontent.com/u/44036562
-            allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
         uses: Ilshidur/action-discord@0.3.2
         with:
-            args: ${{ toJson(github.event) }}
-
-          DISCORD: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: ${{ toJson(github.event) }}
+          username: GitHub Actions
+          avatar_url: https://avatars.githubusercontent.com/u/44036562
+          allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
