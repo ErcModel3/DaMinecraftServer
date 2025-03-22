@@ -24,39 +24,130 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: unnecessary
           if_key_exists: replace
-          
-      # Skip the ssh-keyscan step and use StrictHostKeyChecking=no instead
       
+      # Debug step to check all required secrets
+      - name: Debug repo secrets
+        run: |
+          echo "Checking if all required secrets are set..."
+          if [ -z "${{ secrets.SERVER_HOST_IP }}" ]; then
+            echo "⚠️ SERVER_HOST secret is not set or empty!"
+            exit 1
+          else
+            echo "✅ SERVER_HOST is set"
+          fi
+          
+          if [ -z "${{ secrets.SSH_PORT }}" ]; then
+            echo "⚠️ SSH_PORT secret is not set or empty!"
+            exit 1
+          else
+            echo "✅ SSH_PORT is set"
+          fi
+          
+          if [ -z "${{ secrets.DEPLOY_USER }}" ]; then
+            echo "⚠️ DEPLOY_USER secret is not set or empty!"
+            exit 1
+          else
+            echo "✅ DEPLOY_USER is set"
+          fi
+          
+      - name: Test SSH port connectivity
+        run: |
+          echo "Testing SSH port connectivity to ${{ secrets.SERVER_HOST_IP }} on port ${{ secrets.SSH_PORT }}..."
+          timeout 5 bash -c "</dev/tcp/${{ secrets.SERVER_HOST_IP }}/${{ secrets.SSH_PORT }}" && echo "✅ SSH port is reachable" || echo "❌ SSH port is not reachable"
+
+      # Add a port connectivity test
+      - name: Test Port Connectivity
+        run: |
+          echo "Testing connectivity to ${{ secrets.SERVER_HOST_IP }} on port ${{ secrets.SSH_PORT }}..."
+          if nc -zvw5 ${{ secrets.SERVER_HOST_IP }} ${{ secrets.SSH_PORT }}; then
+            echo "✅ Port ${{ secrets.SSH_PORT }} is open and accepting connections"
+          else
+            echo "❌ Failed to connect to port ${{ secrets.SSH_PORT }}"
+            echo "This could indicate port forwarding issues, firewall rules, or that SSH service is not running"
+            exit 1
+          fi
+
+      # Setup SSH config with checks
       - name: Setup SSH Config
         run: |
           mkdir -p ~/.ssh
-          echo "Host minecraft-server" >> ~/.ssh/config
-          echo "  HostName ${{ secrets.SERVER_HOST }}" >> ~/.ssh/config
-          echo "  User ${{ secrets.DEPLOY_USER }}" >> ~/.ssh/config
-          echo "  Port ${{ secrets.SSH_PORT }}" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
+          
+          # Only create config with valid values
+          if [ -n "${{ secrets.SERVER_HOST_IP }}" ] && [ -n "${{ secrets.DEPLOY_USER }}" ] && [ -n "${{ secrets.SSH_PORT }}" ]; then
+            echo "Host minecraft-server" > ~/.ssh/config
+            echo "  HostName ${{ secrets.SERVER_HOST_IP }}" >> ~/.ssh/config
+            echo "  User ${{ secrets.DEPLOY_USER }}" >> ~/.ssh/config
+            echo "  Port ${{ secrets.SSH_PORT }}" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+            chmod 600 ~/.ssh/config
+            echo "SSH config created successfully"
+            cat ~/.ssh/config | grep -v "HostName" | grep -v "User" # Show config without sensitive info
+          else
+            echo "Cannot create SSH config - one or more required secrets are missing"
+            exit 1
+          fi
 
+      # Try a different SSH connection with verbose output
       - name: Test SSH Connection
-        run: ssh minecraft-server "echo SSH connection successful"
+        run: |
+          echo "Testing SSH connection..."
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "echo SSH connection successful"
 
+      # Try a direct SSH connection with verbose output
+      - name: Test SSH Connection
+        run: |
+          echo "Testing direct SSH connection..."
+          ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "echo SSH connection successful"
+
+      # If the above fails, we won't get to these steps
       - name: Deploy Server Config Files
         run: |
-          rsync -avz --exclude='.git' ./server/config/ minecraft-server:/etc/minecraft/server/config/
+          if [ -d "./server/config/" ]; then
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/config"
+            
+            # Sync to the temp directory (which the user owns)
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/config/
+            
+            # Use sudo to copy and set proper permissions
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/server/config && sudo cp -r ~/minecraft_deploy/config/* /etc/minecraft/server/config/ && sudo chown -R minecraft:minecraft /etc/minecraft/server/config/ || true"
+          else
+            echo "server/config directory not found in repository"
+          fi
           
       - name: Deploy Server Scripts
         run: |
-          rsync -avz ./server/scripts/ minecraft-server:/etc/minecraft/server/scripts/
-          ssh minecraft-server "chmod +x /etc/minecraft/server/scripts/*.sh"
+          if [ -d "./server/scripts/" ]; then
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/scripts"
+            
+            # Sync to the temp directory
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" ./server/scripts/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/scripts/
+            
+            # Use sudo to copy, set permissions and make executable
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/server/scripts && sudo cp -r ~/minecraft_deploy/scripts/* /etc/minecraft/server/scripts/ && sudo chmod +x /etc/minecraft/server/scripts/*.sh && sudo chown -R minecraft:minecraft /etc/minecraft/server/scripts/ || true"
+          else
+            echo "server/scripts directory not found in repository"
+          fi
           
       - name: Deploy Monitoring Tools
         run: |
-          rsync -avz ./monitoring/ minecraft-server:/etc/minecraft/monitoring/
-          ssh minecraft-server "chmod +x /etc/minecraft/monitoring/*.py"
+          if [ -d "./monitoring/" ]; then
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/monitoring"
+            
+            # Sync to the temp directory
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" ./monitoring/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/monitoring/
+            
+            # Use sudo to copy, set permissions and make executable
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/monitoring && sudo cp -r ~/minecraft_deploy/monitoring/* /etc/minecraft/monitoring/ && sudo chmod +x /etc/minecraft/monitoring/*.py && sudo chown -R minecraft:minecraft /etc/minecraft/monitoring/ || true"
+          else
+            echo "monitoring directory not found in repository"
+          fi
           
       - name: Restart Minecraft Server
         if: ${{ github.event.inputs.restart == 'true' || github.event_name == 'workflow_dispatch' }}
         run: |
-          ssh minecraft-server "sudo systemctl restart minecraft.service"
-          ssh minecraft-server "sudo systemctl status minecraft.service"
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl restart minecraft.service"
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl status minecraft.service"
