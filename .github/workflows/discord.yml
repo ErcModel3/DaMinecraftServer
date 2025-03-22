@@ -9,10 +9,14 @@ jobs:
         uses: actions/checkout@v3
     
       - name: Send Discord Webhook
+        env:
+            DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+            content: ${{ toJson(github.event) }}
+            username: GitHub Actions
+            avatar_url: https://avatars.githubusercontent.com/u/44036562
+            allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
         uses: Ilshidur/action-discord@0.3.2
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          content: ${{ toJson(github.event) }}
-          username: GitHub Actions
-          avatar_url: https://avatars.githubusercontent.com/u/44036562
-          allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
+            args: ${{ toJson(github.event) }}
+
+          DISCORD: ${{ secrets.DISCORD_WEBHOOK_URL }}
