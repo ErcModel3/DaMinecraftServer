@@ -1,16 +1,16 @@
 name: Discord Updates
 on: [create, delete, push, pull_request, pull_request_review, issue_comment, push]
 jobs:
-    webhook-request:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-            - name: Send Discord Webhook
-              uses: Ilshidur/action-discord@v2.1.0
-              with:
-                  webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-                  content: ${{ toJson(github.event) }}
-                  username: GitHub Actions
-                  avatar_url: https://avatars.githubusercontent.com/u/44036562
-                  allowed_mentions: '{"parse": ["users", "roles", "everyone"], "replied_user": true}'
+  webhook-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Send Discord Webhook
+        uses: Ilshidur/action-discord@master
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: ${{ toJson(github.event) }}
+          username: GitHub Actions
+          avatar_url: https://avatars.githubusercontent.com/u/44036562
+          allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
