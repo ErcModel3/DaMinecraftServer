@@ -49,19 +49,7 @@ jobs:
           else
             echo "✅ DEPLOY_USER is set"
           fi
-
-      # Add a ping test to confirm connectivity
-      # - name: Test Network Connectivity
-      #   run: |
-      #     echo "Testing network connectivity to ${{ secrets.SERVER_HOST_IP }}..."
-      #     if ping -c 4 ${{ secrets.SERVER_HOST_IP }}; then
-      #       echo "✅ Server is reachable"
-      #     else
-      #       echo "❌ Failed to ping server"
-      #       echo "This could indicate network/firewall issues or an incorrect IP address"
-      #       exit 1
-      #     fi
-
+          
       - name: Test SSH port connectivity
         run: |
           echo "Testing SSH port connectivity to ${{ secrets.SERVER_HOST_IP }} on port ${{ secrets.SSH_PORT }}..."
