@@ -116,7 +116,14 @@ jobs:
       - name: Deploy Server Config Files
         run: |
           if [ -d "./server/config/" ]; then
-            rsync -avz --no-times -e "ssh -p ${{ secrets.SSH_PORT }}" --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:/etc/minecraft/server/config/
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/config"
+            
+            # Sync to the temp directory (which the user owns)
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/config/
+            
+            # Use sudo to copy and set proper permissions
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/server/config && sudo cp -r ~/minecraft_deploy/config/* /etc/minecraft/server/config/ && sudo chown -R minecraft:minecraft /etc/minecraft/server/config/ || true"
           else
             echo "server/config directory not found in repository"
           fi
