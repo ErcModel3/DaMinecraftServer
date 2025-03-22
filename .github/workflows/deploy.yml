@@ -51,16 +51,21 @@ jobs:
           fi
 
       # Add a ping test to confirm connectivity
-      - name: Test Network Connectivity
+      # - name: Test Network Connectivity
+      #   run: |
+      #     echo "Testing network connectivity to ${{ secrets.SERVER_HOST_IP }}..."
+      #     if ping -c 4 ${{ secrets.SERVER_HOST_IP }}; then
+      #       echo "✅ Server is reachable"
+      #     else
+      #       echo "❌ Failed to ping server"
+      #       echo "This could indicate network/firewall issues or an incorrect IP address"
+      #       exit 1
+      #     fi
+
+      - name: Test SSH port connectivity
         run: |
-          echo "Testing network connectivity to ${{ secrets.SERVER_HOST_IP }}..."
-          if ping -c 4 ${{ secrets.SERVER_HOST_IP }}; then
-            echo "✅ Server is reachable"
-          else
-            echo "❌ Failed to ping server"
-            echo "This could indicate network/firewall issues or an incorrect IP address"
-            exit 1
-          fi
+          echo "Testing SSH port connectivity to ${{ secrets.SERVER_HOST }} on port ${{ secrets.SSH_PORT }}..."
+          timeout 5 bash -c "</dev/tcp/${{ secrets.SERVER_HOST }}/${{ secrets.SSH_PORT }}" && echo "✅ SSH port is reachable" || echo "❌ SSH port is not reachable"
 
       # Add a port connectivity test
       - name: Test Port Connectivity
