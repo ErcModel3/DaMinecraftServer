@@ -2,7 +2,7 @@ name: Discord Updates
 on: [create, delete, push, pull_request, pull_request_review, issue_comment]
 
 jobs:
-  webhook-request:
+  SendDiscordWebhook:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -10,7 +10,7 @@ jobs:
       - name: Send Discord Webhook
         uses: Ilshidur/action-discord@0.3.2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           message: ${{ toJson(github.event) }}
           username: GitHub Actions
           avatar_url: https://avatars.githubusercontent.com/u/44036562
