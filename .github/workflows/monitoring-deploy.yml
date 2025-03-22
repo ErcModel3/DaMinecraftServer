@@ -1,8 +1,15 @@
-name: Deploy and restart monitoring config
+name: Deploy monitoring config
 
 on:
-  push:
-    branches: [ main ]
+    push:
+      branches: [ main ]
+    workflow_dispatch:
+      inputs:
+        restart:
+          description: 'Restart the server after deployment'
+          required: false
+          default: 'false'
+          type: boolean
 
 jobs:
   confirm-deploy:
