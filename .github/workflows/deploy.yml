@@ -131,8 +131,14 @@ jobs:
       - name: Deploy Server Scripts
         run: |
           if [ -d "./server/scripts/" ]; then
-            rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./server/scripts/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:/etc/minecraft/server/scripts/
-            ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "chmod +x /etc/minecraft/server/scripts/*.sh"
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/scripts"
+            
+            # Sync to the temp directory
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" ./server/scripts/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/scripts/
+            
+            # Use sudo to copy, set permissions and make executable
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/server/scripts && sudo cp -r ~/minecraft_deploy/scripts/* /etc/minecraft/server/scripts/ && sudo chmod +x /etc/minecraft/server/scripts/*.sh && sudo chown -R minecraft:minecraft /etc/minecraft/server/scripts/ || true"
           else
             echo "server/scripts directory not found in repository"
           fi
@@ -140,8 +146,14 @@ jobs:
       - name: Deploy Monitoring Tools
         run: |
           if [ -d "./monitoring/" ]; then
-            rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./monitoring/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:/etc/minecraft/monitoring/
-            ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "chmod +x /etc/minecraft/monitoring/*.py"
+            # Create a temporary deploy directory
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "mkdir -p ~/minecraft_deploy/monitoring"
+            
+            # Sync to the temp directory
+            rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" ./monitoring/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:~/minecraft_deploy/monitoring/
+            
+            # Use sudo to copy, set permissions and make executable
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo mkdir -p /etc/minecraft/monitoring && sudo cp -r ~/minecraft_deploy/monitoring/* /etc/minecraft/monitoring/ && sudo chmod +x /etc/minecraft/monitoring/*.py && sudo chown -R minecraft:minecraft /etc/minecraft/monitoring/ || true"
           else
             echo "monitoring directory not found in repository"
           fi
