@@ -1,6 +1,6 @@
 name: Discord Updates
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [create, delete, push, pull_request, pull_request_review, issue_comment]
+on: [pull_request, pull_request_review, push]
 
 jobs:
   SendDiscordWebhook:
@@ -11,5 +11,7 @@ jobs:
             DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
           uses: Ilshidur/action-discord@master
           with:
-            args: '${{ github.actor }} has pushed a ${{ github.event}} to {{ EVENT_PAYLOAD.repository.full_name }}.'
+            args: '${{ github.actor }} has raised a pull request on for review!'
+            args: 'Pull Request: ${{ github.event.pull_request.title }}'
+            args: 'Pull Request URL: ${{ github.event.pull_request.html_url }}'
             
