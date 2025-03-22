@@ -50,6 +50,30 @@ jobs:
             echo "✅ DEPLOY_USER is set"
           fi
 
+      # Add a ping test to confirm connectivity
+      - name: Test Network Connectivity
+        run: |
+          echo "Testing network connectivity to ${{ secrets.SERVER_HOST_IP }}..."
+          if ping -c 4 ${{ secrets.SERVER_HOST_IP }}; then
+            echo "✅ Server is reachable"
+          else
+            echo "❌ Failed to ping server"
+            echo "This could indicate network/firewall issues or an incorrect IP address"
+            exit 1
+          fi
+
+      # Add a port connectivity test
+      - name: Test Port Connectivity
+        run: |
+          echo "Testing connectivity to ${{ secrets.SERVER_HOST_IP }} on port ${{ secrets.SSH_PORT }}..."
+          if nc -zvw5 ${{ secrets.SERVER_HOST_IP }} ${{ secrets.SSH_PORT }}; then
+            echo "✅ Port ${{ secrets.SSH_PORT }} is open and accepting connections"
+          else
+            echo "❌ Failed to connect to port ${{ secrets.SSH_PORT }}"
+            echo "This could indicate port forwarding issues, firewall rules, or that SSH service is not running"
+            exit 1
+          fi
+
       # Setup SSH config with checks
       - name: Setup SSH Config
         run: |
