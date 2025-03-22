@@ -11,3 +11,7 @@ jobs:
           uses: Ilshidur/action-discord@master
           with:
             args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been deployed.'
+            content: ${{ toJson(github.event) }}
+            username: GitHub Actions
+            avatar_url: https://avatars.githubusercontent.com/u/44036562
+            
