@@ -1,0 +1,50 @@
+name: Deploy to Minecraft Server
+run-name: ${{ github.actor }} is Deploying to the Server🚀
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      restart:
+        description: 'Restart the server after deployment'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: unnecessary
+          if_key_exists: replace
+
+      - name: Add server to known hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy Server Config Files
+        run: |
+          rsync -avz --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }}:/etc/minecraft/server/config/
+          
+      - name: Deploy Server Scripts
+        run: |
+          rsync -avz ./server/scripts/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }}:/etc/minecraft/server/scripts/
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "chmod +x /etc/minecraft/server/scripts/*.sh"
+          
+      - name: Deploy Monitoring Tools
+        run: |
+          rsync -avz ./monitoring/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }}:/etc/minecraft/monitoring/
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "chmod +x /etc/minecraft/monitoring/*.py"
+          
+      - name: Restart Minecraft Server
+        if: ${{ github.event.inputs.restart == 'true' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "sudo systemctl restart minecraft.service"
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "sudo systemctl status minecraft.service"
