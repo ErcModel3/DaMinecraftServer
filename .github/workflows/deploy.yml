@@ -1,5 +1,5 @@
 name: Deploy to Minecraft Server
-run-name: ${{ github.actor }} is deploying a change to the server! 🚀
+run-name: ${{ github.actor }} has raised a pull request! 🚀
 
 on:
   push:
