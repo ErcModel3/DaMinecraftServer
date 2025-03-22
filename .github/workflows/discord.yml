@@ -5,13 +5,9 @@ jobs:
   SendDiscordWebhook:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Send Discord Webhook
-        uses: Ilshidur/action-discord@0.3.2
-        with:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          message: ${{ toJson(github.event) }}
-          username: GitHub Actions
-          avatar_url: https://avatars.githubusercontent.com/u/44036562
-          allowed_mentions: '{"parse": ["users", "roles"], "replied_user": true}'
+        - name: Discord notification
+          env:
+            DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          uses: Ilshidur/action-discord@master
+          with:
+            args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been deployed.'
