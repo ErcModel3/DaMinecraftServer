@@ -64,8 +64,8 @@ jobs:
 
       - name: Test SSH port connectivity
         run: |
-          echo "Testing SSH port connectivity to ${{ secrets.SERVER_HOST }} on port ${{ secrets.SSH_PORT }}..."
-          timeout 5 bash -c "</dev/tcp/${{ secrets.SERVER_HOST }}/${{ secrets.SSH_PORT }}" && echo "✅ SSH port is reachable" || echo "❌ SSH port is not reachable"
+          echo "Testing SSH port connectivity to ${{ secrets.SERVER_HOST_IP }} on port ${{ secrets.SSH_PORT }}..."
+          timeout 5 bash -c "</dev/tcp/${{ secrets.SERVER_HOST_IP }}/${{ secrets.SSH_PORT }}" && echo "✅ SSH port is reachable" || echo "❌ SSH port is not reachable"
 
       # Add a port connectivity test
       - name: Test Port Connectivity
@@ -104,7 +104,7 @@ jobs:
       - name: Test SSH Connection
         run: |
           echo "Testing SSH connection..."
-          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "echo SSH connection successful"
 
       # Try a direct SSH connection with verbose output
       - name: Test SSH Connection
