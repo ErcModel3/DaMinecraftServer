@@ -116,7 +116,7 @@ jobs:
       - name: Deploy Server Config Files
         run: |
           if [ -d "./server/config/" ]; then
-            rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:/etc/minecraft/server/config/
+            rsync -avz --no-times -e "ssh -p ${{ secrets.SSH_PORT }}" --exclude='.git' ./server/config/ ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }}:/etc/minecraft/server/config/
           else
             echo "server/config directory not found in repository"
           fi
