@@ -26,9 +26,6 @@ jobs:
           known_hosts: unnecessary
           if_key_exists: replace
 
-      - name: Debug SERVER_HOST
-        run: echo ${{ secrets.SERVER_HOST }}
-
       - name: Add server to known hosts
         run: ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
