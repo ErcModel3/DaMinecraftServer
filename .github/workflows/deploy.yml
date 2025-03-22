@@ -71,11 +71,11 @@ jobs:
             exit 1
           fi
 
-      # Try a direct SSH connection with verbose output
+      # Try a different SSH connection with verbose output
       - name: Test SSH Connection
         run: |
-          echo "Testing direct SSH connection..."
-          ssh -v -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "echo SSH connection successful"
+          echo "Testing SSH connection..."
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
 
       # Try a direct SSH connection with verbose output
       - name: Test SSH Connection
