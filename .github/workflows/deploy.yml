@@ -1,4 +1,4 @@
-name: Deploy to Minecraft Server
+name: Deploy and Restart the Minecraft Server!
 
 on:
   push:
