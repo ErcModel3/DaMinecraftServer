@@ -2,14 +2,15 @@ name: Deploy to Minecraft Server
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      restart:
-        description: 'Restart the server after deployment'
-        required: false
-        default: 'false'
-        type: boolean
+    # branches: [ main ]
+    branches: [ * ]
+  # workflow_dispatch:
+  #   inputs:
+  #     restart:
+  #       description: 'Restart the server after deployment'
+  #       required: false
+  #       default: 'false'
+  #       type: boolean
 
 jobs:
   deploy:
