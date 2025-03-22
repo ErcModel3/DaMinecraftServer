@@ -3,7 +3,6 @@ name: Deploy to Minecraft Server
 on:
   push:
     # branches: [ main ]
-    branches: [ '*' ]
   # workflow_dispatch:
   #   inputs:
   #     restart:
