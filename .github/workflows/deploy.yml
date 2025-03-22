@@ -26,7 +26,7 @@ jobs:
           if_key_exists: replace
       
       # Debug step to check all required secrets
-      - name: Debug secrets
+      - name: Debug repo secrets
         run: |
           echo "Checking if all required secrets are set..."
           if [ -z "${{ secrets.SERVER_HOST_IP }}" ]; then
