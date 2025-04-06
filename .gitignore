@@ -1,4 +1,8 @@
+*.iml
 .idea/
+.DS_Store
+server/.DS_Store
+
 
 # World data
 world/
