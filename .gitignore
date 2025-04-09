@@ -19,3 +19,7 @@ usercache.json
 #Monitoring files on the server
 *.pyc
 __pycache__/
+
+# Minecraft env files
+*.dat
+server/config/Geminai
