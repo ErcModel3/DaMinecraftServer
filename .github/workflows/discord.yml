@@ -1,5 +1,5 @@
 name: Discord Updates
-on: [pull_request, pull_request_review]
+# on: [pull_request]
 
 jobs:
   SendDiscordWebhook:
