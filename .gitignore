@@ -1,4 +1,7 @@
+*.iml
 .idea/
+.DS_Store
+server/.DS_Store
 
 # World data
 world/
@@ -15,3 +18,7 @@ usercache.json
 #Monitoring files on the server
 *.pyc
 __pycache__/
+
+# Minecraft env files
+*.dat
+server/config/Geminai
