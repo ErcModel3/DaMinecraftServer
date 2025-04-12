@@ -1,13 +1,16 @@
 name: Starts a stopped Minecraft Server!
 
 on:
-  workflow_dispatch:
-    inputs:
-      restart:
-        description: 'Are you sure you want to restart the server?'
-        required: 'Yes'
-        default: 'No'
-        type: String
+    push:
+        branches:
+        - master        
+    workflow_dispatch:
+        inputs:
+        restart:
+            description: 'Are you sure you want to restart the server?'
+            required: 'Yes'
+            default: 'No'
+            type: String
 
 jobs:
   deploy:
