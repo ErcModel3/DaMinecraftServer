@@ -3,20 +3,21 @@
     "uuid": "fb3636f3-e518-4ff7-9490-8dc50c53ca7f",
     "name": "RubyDelusion"
   },
+
   {
-    "uuid": "fb3636f3e5184ff794908dc50c53ca7f",
-    "name": "RubyDelusion"
-  },
-  {
-    "uuid": "191f9d72d6764f2bb4726d6815cbe97e",
+    "uuid": "191f9d72-d676-4f2b-b472-6d6815cbe97e",
     "name": "AValencia"
   },
   {
-    "uuid": "bffa784d90f34b86b356ad59d253aa58",
+    "uuid": "bffa784d-90f3-4b86-b356-ad59d253aa58",
     "name": "JollySwollie"
   },
   {
-    "uuid": "7c94e3346123403481cceee91112fc03",
+    "uuid": "7c94e334-6123-4034-81cc-eee91112fc03",
     "name": "Joshhyyy"
+  },
+  {
+    "uuid": "66c00e0c-f0fd-4a8f-8301-1ef3527d4c90",
+    "name": "SudoRand"
   }
 ]
