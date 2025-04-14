@@ -12,6 +12,20 @@ on:
             default: 'No'
             type: String
 
+jobs:name: Starts a stopped Minecraft Server!
+
+on:
+    push:
+        branches:
+        - master        
+    workflow_dispatch:
+        inputs:
+          restart:
+            description: 'Type "yes" to confirm restarting the server'
+            required: true
+            default: 'no'
+            type: string
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
