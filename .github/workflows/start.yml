@@ -1,4 +1,4 @@
-name: Starts a stopped Minecraft Server!
+name: Restart a stopped Minecraft Server!
 
 on:
   push:
