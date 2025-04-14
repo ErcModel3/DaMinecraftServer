@@ -1,16 +1,16 @@
 name: Starts a stopped Minecraft Server!
 
 on:
-    push:
-        branches:
-        - master        
-    workflow_dispatch:
-        inputs:
-          restart:
-            description: 'Type "yes" to confirm restarting the server'
-            required: true
-            default: 'no'
-            type: string
+  push:
+    branches:
+      - master        
+  workflow_dispatch:
+    inputs:
+      restart:
+        description: 'Type "yes" to confirm restarting the server'
+        required: true
+        default: 'no'
+        type: string
 
 jobs:
   deploy:
@@ -29,8 +29,8 @@ jobs:
       - name: Echo Echo
         run: echo "Echo Echo"
 
-    #   - name: Restart Minecraft Server
-    #     if: ${{ github.event.inputs.restart == 'true' || github.event_name == 'workflow_dispatch' }}
-    #     run: |
-    #       ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl restart minecraft.service"
-    #       ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl status minecraft.service"
+      - name: Restart Minecraft Server
+        if: ${{ github.event.inputs.restart == 'yes' && github.event_name == 'workflow_dispatch' }}
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl restart minecraft.service"
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.SERVER_HOST_IP }} "sudo systemctl status minecraft.service"
