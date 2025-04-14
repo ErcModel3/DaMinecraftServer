@@ -3,7 +3,7 @@ name: Starts a stopped Minecraft Server!
 on:
   push:
     branches:
-      - master        
+      - master
   workflow_dispatch:
     inputs:
       restart:
