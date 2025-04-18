@@ -3,8 +3,21 @@
 .DS_Store
 server/.DS_Store
 
+# /World/ dir - minus datapacks
+world/advancements/
+world/data/
+world/DIM-1/
+world/DIM1/
+world/entities/
+world/playerdata/
+world/poi/
+world/region/
+world/stats/
+
 # World data
-world/
+world/level.dat
+world/level.dat
+world/session.lock
 
 #Java binaries and libaries
 *.jar
